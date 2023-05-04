@@ -147,48 +147,48 @@ bool q_delete_dup(struct list_head *head)
 void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
-    if (!list_empty(head) && head->next != head->prev) {
-        struct list_head *prev_node, *curr_nodeA, *curr_nodeB, *next_node;
-        prev_node = head;
-        curr_nodeA = head->next;
+    if (list_empty(head) || head->next == head->prev)
+        return;
+    struct list_head *prev_node, *curr_nodeA, *curr_nodeB, *next_node;
+    prev_node = head;
+    curr_nodeA = head->next;
+    curr_nodeB = curr_nodeA->next;
+    next_node = curr_nodeB->next;
+
+    while (curr_nodeA != head && curr_nodeB != head) {
+        prev_node->next = curr_nodeB;
+        curr_nodeA->next = next_node;
+        curr_nodeA->prev = curr_nodeB;
+        curr_nodeB->next = curr_nodeA;
+        curr_nodeB->prev = prev_node;
+
+        prev_node = curr_nodeA;
+        curr_nodeA = next_node;
         curr_nodeB = curr_nodeA->next;
         next_node = curr_nodeB->next;
-
-        while (curr_nodeA != head && curr_nodeB != head) {
-            prev_node->next = curr_nodeB;
-            curr_nodeA->next = next_node;
-            curr_nodeA->prev = curr_nodeB;
-            curr_nodeB->next = curr_nodeA;
-            curr_nodeB->prev = prev_node;
-
-            prev_node = curr_nodeA;
-            curr_nodeA = next_node;
-            curr_nodeB = curr_nodeA->next;
-            next_node = curr_nodeB->next;
-        }
-        head->prev = curr_nodeA;
     }
+    head->prev = curr_nodeA;
 }
 
 /* Reverse elements in queue */
 void q_reverse(struct list_head *head)
 {
-    if (!list_empty(head) && head->next != head->prev) {
-        struct list_head *prev_node, *curr_node, *next_node;
-        prev_node = head;
-        curr_node = head->next;
-        head->next = head->prev;
-        head->prev = curr_node;
-        next_node = curr_node->next;
+    if (list_empty(head) || head->next == head->prev)
+        return;
+    struct list_head *prev_node, *curr_node, *next_node;
+    prev_node = head;
+    curr_node = head->next;
+    head->next = head->prev;
+    head->prev = curr_node;
+    next_node = curr_node->next;
 
-        while (curr_node != head) {
-            curr_node->next = prev_node;
-            curr_node->prev = next_node;
+    while (curr_node != head) {
+        curr_node->next = prev_node;
+        curr_node->prev = next_node;
 
-            prev_node = curr_node;
-            curr_node = next_node;
-            next_node = next_node->next;
-        }
+        prev_node = curr_node;
+        curr_node = next_node;
+        next_node = next_node->next;
     }
 }
 
@@ -214,31 +214,31 @@ int q_ascend(struct list_head *head)
 int q_descend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    if (!list_empty(head) && head->next != head->prev) {
-        struct list_head *curr_node = head->next;
-        element_t *curr_entry = list_entry(curr_node, element_t, list);
-        element_t *next_entry = list_entry(curr_node, element_t, list);
+    if (list_empty(head) || head->next == head->prev)
+        return 0;
+    struct list_head *curr_node = head->next;
+    element_t *curr_entry = list_entry(curr_node, element_t, list);
+    element_t *next_entry = list_entry(curr_node, element_t, list);
 
-        list_for_each_entry (next_entry, head, list) {
-            // printf("curr:%s next:%s  cmp: %d\n", curr_entry->value,
-            // next_entry->value,strcmp(curr_entry->value, next_entry->value));
-            if (strcmp(curr_entry->value, next_entry->value) < 0) {
-                struct list_head *safe_node = curr_node->next;
-                while (curr_node != &next_entry->list) {
-                    element_t *rm = list_entry(curr_node, element_t, list);
-                    // printf("currvalue:%s, nextvalue:%s\n", rm->value,
-                    // next_entry->value);
-                    list_del(&rm->list);
-                    q_release_element(rm);
-                    curr_node = safe_node;
-                    safe_node = safe_node->next;
-                }
-                head->next = &next_entry->list;
-                next_entry->list.prev = head;
-
-                curr_node = &next_entry->list;
-                curr_entry = list_entry(curr_node, element_t, list);
+    list_for_each_entry (next_entry, head, list) {
+        // printf("curr:%s next:%s  cmp: %d\n", curr_entry->value,
+        // next_entry->value,strcmp(curr_entry->value, next_entry->value));
+        if (strcmp(curr_entry->value, next_entry->value) < 0) {
+            struct list_head *safe_node = curr_node->next;
+            while (curr_node != &next_entry->list) {
+                element_t *rm = list_entry(curr_node, element_t, list);
+                // printf("currvalue:%s, nextvalue:%s\n", rm->value,
+                // next_entry->value);
+                list_del(&rm->list);
+                q_release_element(rm);
+                curr_node = safe_node;
+                safe_node = safe_node->next;
             }
+            head->next = &next_entry->list;
+            next_entry->list.prev = head;
+
+            curr_node = &next_entry->list;
+            curr_entry = list_entry(curr_node, element_t, list);
         }
     }
     return q_size(head);
