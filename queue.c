@@ -214,7 +214,34 @@ int q_ascend(struct list_head *head)
 int q_descend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
+    if (!list_empty(head) && head->next != head->prev) {
+        struct list_head *curr_node = head->next;
+        element_t *curr_entry = list_entry(curr_node, element_t, list);
+        element_t *next_entry = list_entry(curr_node, element_t, list);
+
+        list_for_each_entry (next_entry, head, list) {
+            // printf("curr:%s next:%s  cmp: %d\n", curr_entry->value,
+            // next_entry->value,strcmp(curr_entry->value, next_entry->value));
+            if (strcmp(curr_entry->value, next_entry->value) < 0) {
+                struct list_head *safe_node = curr_node->next;
+                while (curr_node != &next_entry->list) {
+                    element_t *rm = list_entry(curr_node, element_t, list);
+                    // printf("currvalue:%s, nextvalue:%s\n", rm->value,
+                    // next_entry->value);
+                    list_del(&rm->list);
+                    q_release_element(rm);
+                    curr_node = safe_node;
+                    safe_node = safe_node->next;
+                }
+                head->next = &next_entry->list;
+                next_entry->list.prev = head;
+
+                curr_node = &next_entry->list;
+                curr_entry = list_entry(curr_node, element_t, list);
+            }
+        }
+    }
+    return q_size(head);
 }
 
 /* Merge all the queues into one sorted queue, which is in ascending/descending
