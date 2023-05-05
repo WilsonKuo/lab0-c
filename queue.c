@@ -167,7 +167,8 @@ void q_swap(struct list_head *head)
         curr_nodeB = curr_nodeA->next;
         next_node = curr_nodeB->next;
     }
-    head->prev = curr_nodeA;
+
+    head->prev = (head == curr_nodeA) ? prev_node : curr_nodeA;
 }
 
 /* Reverse elements in queue */
