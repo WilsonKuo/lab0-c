@@ -197,6 +197,22 @@ void q_reverse(struct list_head *head)
 void q_reverseK(struct list_head *head, int k)
 {
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
+    if (!head || list_empty(head))
+        return;
+    struct list_head *curr_node, *safe_node, tmp, *tmp_head = head;
+    INIT_LIST_HEAD(&tmp);
+    int i = 0;
+    list_for_each_safe (curr_node, safe_node, head) {
+        i++;
+        if (i == k) {
+            list_cut_position(&tmp, tmp_head, curr_node);
+            q_reverse(&tmp);
+            list_splice(&tmp, tmp_head);
+            tmp_head = safe_node->prev;
+            i = 0;
+        }
+    }
+    return;
 }
 
 /* Sort elements of queue in ascending/descending order */
@@ -207,7 +223,30 @@ void q_sort(struct list_head *head, bool descend) {}
 int q_ascend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
+    if (list_empty(head) || head->next == head->prev)
+        return 0;
+    struct list_head *curr_node = head->next;
+    element_t *curr_entry = list_entry(curr_node, element_t, list);
+    element_t *next_entry = list_entry(curr_node, element_t, list);
+
+    list_for_each_entry (next_entry, head, list) {
+        if (strcmp(curr_entry->value, next_entry->value) < 0) {
+            struct list_head *safe_node = curr_node->next;
+            while (curr_node != &next_entry->list) {
+                element_t *rm = list_entry(curr_node, element_t, list);
+                list_del(&rm->list);
+                q_release_element(rm);
+                curr_node = safe_node;
+                safe_node = safe_node->next;
+            }
+            head->next = &next_entry->list;
+            next_entry->list.prev = head;
+
+            curr_node = &next_entry->list;
+            curr_entry = list_entry(curr_node, element_t, list);
+        }
+    }
+    return q_size(head);
 }
 
 /* Remove every node which has a node with a strictly greater value anywhere to
