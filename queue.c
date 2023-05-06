@@ -278,14 +278,10 @@ int q_descend(struct list_head *head)
     element_t *next_entry = list_entry(curr_node, element_t, list);
 
     list_for_each_entry (next_entry, head, list) {
-        // printf("curr:%s next:%s  cmp: %d\n", curr_entry->value,
-        // next_entry->value,strcmp(curr_entry->value, next_entry->value));
         if (strcmp(curr_entry->value, next_entry->value) < 0) {
             struct list_head *safe_node = curr_node->next;
             while (curr_node != &next_entry->list) {
                 element_t *rm = list_entry(curr_node, element_t, list);
-                // printf("currvalue:%s, nextvalue:%s\n", rm->value,
-                // next_entry->value);
                 list_del(&rm->list);
                 q_release_element(rm);
                 curr_node = safe_node;
