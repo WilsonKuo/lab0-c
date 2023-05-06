@@ -240,7 +240,7 @@ void q_sort(struct list_head *head, bool descend) {}
 int q_ascend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    if (list_empty(head) || head->next == head->prev)
+    if (list_empty(head) || list_is_singular(head))
         return 0;
     struct list_head *curr_node = head->next;
     element_t *curr_entry = list_entry(curr_node, element_t, list);
